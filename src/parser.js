@@ -1,15 +1,7 @@
 import * as cheerio from 'cheerio';
-// import fs from 'fs';
-// import { fileURLToPath } from 'url';
-import path, { dirname } from 'path';
+import path from 'path';
 
 import renameFromUrl from '../utils/renameFromUrl.js';
-
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = dirname(__filename);
-// const filePath = path.resolve(__dirname, '..', '__fixtures__', 'ru-hexlet-io-courses-before.html');
-
-// const data = fs.readFileSync(filePath);
 
 export default (htmlData, domenUrl, directory) => {
   const hostParts = domenUrl.split('.');
@@ -19,7 +11,6 @@ export default (htmlData, domenUrl, directory) => {
 
   const $ = cheerio.load(htmlData);
   const $img = $('img');
-  // console.log($img.attr('src'));
   const filesUrls = [];
   $img
     .filter((i, { attribs: { src } }) => !src.includes('http') || src.includes(hostName))
@@ -32,6 +23,3 @@ export default (htmlData, domenUrl, directory) => {
 
   return { htmlData: $.html(), filesUrls };
 };
-
-// console.log(new URL('https://ru.hexlet.io/courses'))
-// parser(data, 'https://ru.hexlet.io', 'ru-hexlet-io-courses_files');

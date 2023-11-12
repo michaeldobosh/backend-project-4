@@ -2,7 +2,7 @@ import nock from 'nock';
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 import { tmpdir } from 'node:os';
-import fsp, { opendir } from 'fs/promises';
+import fsp from 'fs/promises';
 
 import pageLoader from '../src/index.js';
 import renameFromUrl from '../utils/renameFromUrl.js';
