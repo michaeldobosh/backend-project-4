@@ -45,11 +45,11 @@ test('pageLoader/htmlChanges', async () => {
 
 test('downloadingImages', async () => {
   const pathToFileDirectory = path.resolve(tmp.pathToDirectory, tmp.fileDirectoryName);
-  const dir = await opendir(pathToFileDirectory);
-  const file = await dir.read();
+  const dir = await fsp.readdir(tmp.pathToDirectory);
+  const dir2 = await fsp.readdir(pathToFileDirectory);
 
-  console.log(dir);
-  console.log(file);
+  console.log('Open main directory: ', dir);
+  console.log('Open files directory (ru-hexlet-io-courses_files): ', dir2);
 
-  expect(file.name).toEqual('ru-hexlet-io-courses_files/ru-hexlet-io-assets-experts-mokevnin-e24b0edf2c468a90e04c8a94f6fce444693e3c8fddc4b81969776e4bb8e64df6.png');
+  expect('aaa').toEqual('ru-hexlet-io-assets-experts-mokevnin-e24b0edf2c468a90e04c8a94f6fce444693e3c8fddc4b81969776e4bb8e64df6.png');
 });
