@@ -1,0 +1,29 @@
+{
+  "name": "@hexlet/code",
+  "version": "1.0.0",
+  "description": "pageLoader",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaeldobosh/backend-project-4.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/michaeldobosh/backend-project-4/issues"
+  },
+  "homepage": "https://github.com/michaeldobosh/backend-project-4#readme",
+  "devDependencies": {
+    "eslint": "^8.52.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.28.1",
+    "jest": "^29.7.0"
+  },
+  "dependencies": {
+    "axios": "^1.5.1"
+  }
+}
