@@ -7,7 +7,7 @@ import parser from './parser.js';
 
 export default (link, output) => {
   const url = new URL(link);
-  const renamedUrl = renameFromUrl(url.toString(), url.origin);
+  const renamedUrl = renameFromUrl(url.toString());
   const fileName = `${renamedUrl}.html`;
   const directoryFileName = `${renamedUrl}_files`;
   const filepath = path.resolve(output, fileName);
@@ -31,10 +31,10 @@ export default (link, output) => {
       responses.forEach((respons, i) => {
         const { ext } = path.parse(urls[i]);
         if (respons?.data) {
-          fsp.writeFile(path.join(pathToFileDirectory, `${renameFromUrl(urls[i], url.origin)}${ext}`), respons.data);
+          fsp.writeFile(path.join(pathToFileDirectory, `${renameFromUrl(urls[i])}${ext}`), respons.data);
         }
       });
     })
     .then(() => filepath)
-    .catch((err) => console.log(err));
+    .catch((err) => console.log(err.message));
 };

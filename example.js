@@ -7,6 +7,4 @@ function domainParts(str) {
 
 const res = domainParts('http://ru.hexlet.ru');
 
-['a', 'b'].forEach((el, i) => console.log(i))
-
-console.log(new URL('https://cdn2.hexlet.io/assets/flag-ru-cbc8b7f126679346ce42aa727144c020bd7d33be1accb60b49c6c5cccde7cbee.svg'))
+console.log(new URL('/hess/hi.png', '/hess/hi.png').toString());

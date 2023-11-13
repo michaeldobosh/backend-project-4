@@ -47,5 +47,5 @@ test('downloadingImages', async () => {
   const pathToFileDirectory = path.resolve(tmp.pathToDirectory, tmp.fileDirectoryName);
   const dir = await fsp.readdir(pathToFileDirectory);
 
-  expect(dir[0]).toEqual('ru-hexlet-io-assets-experts-mokevnin-e24b0edf2c468a90e04c8a94f6fce444693e3c8fddc4b81969776e4bb8e64df6.png');
+  expect(dir[0]).toEqual('ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png');
 });
