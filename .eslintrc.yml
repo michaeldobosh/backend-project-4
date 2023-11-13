@@ -2,6 +2,10 @@ plugins:
   # https://github.com/jest-community/eslint-plugin-jest
   - jest
 env:
+<<<<<<< HEAD
+=======
+  es2021: true
+>>>>>>> f27d016876085599ba3e11649304af69c1f49f20
   node: true
 extends: 
   - 'airbnb-base'
