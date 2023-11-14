@@ -8,7 +8,7 @@ import parser from './parser.js';
 
 export default (link, output) => {
   const requestUrl = new URL(link);
-  const renamedUrl = renameFromUrl(requestUrl.toString());
+  const renamedUrl = renameFromUrl(requestUrl);
   const fileName = `${renamedUrl}.html`;
   const directoryFileName = `${renamedUrl}_files`;
   const filepath = path.resolve(output, fileName);
@@ -30,7 +30,7 @@ export default (link, output) => {
         if (respons) {
           const { url } = respons.config;
           const { ext } = path.parse(url);
-          fsp.writeFile(path.join(pathToFileDirectory, `${renameFromUrl(url)}${ext}`), respons.data);
+          fsp.writeFile(path.join(pathToFileDirectory, `${renameFromUrl(new URL(url))}${ext}`), respons.data);
         }
       });
     })
