@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-/node_modules/
-=======
 /page-loader/
 /node_modules/
-
-example.js
->>>>>>> f27d016876085599ba3e11649304af69c1f49f20
+example
 coverage

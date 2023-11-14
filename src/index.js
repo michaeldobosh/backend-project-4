@@ -1,37 +1,36 @@
 import path from 'path';
 import fsp from 'fs/promises';
 import axios from 'axios';
+import _ from 'lodash';
 
 import renameFromUrl from '../utils/renameFromUrl.js';
 import parser from './parser.js';
 
 export default (link, output) => {
-  const url = new URL(link);
-  const renamedUrl = renameFromUrl(url.toString());
+  const requestUrl = new URL(link);
+  const renamedUrl = renameFromUrl(requestUrl.toString());
   const fileName = `${renamedUrl}.html`;
   const directoryFileName = `${renamedUrl}_files`;
   const filepath = path.resolve(output, fileName);
   const pathToFileDirectory = path.join(output, directoryFileName);
-  let urls;
 
-  return axios.get(url.toString())
+  return axios.get(requestUrl.toString())
     .then(({ data }) => {
-      const { htmlData, filesUrls } = parser(data, url.origin, directoryFileName);
-      urls = filesUrls;
+      const { htmlData, filesUrls } = parser(data, requestUrl.origin, directoryFileName);
       fsp.mkdir(pathToFileDirectory);
-      return htmlData;
+      return { htmlData, filesUrls };
     })
-    .then((htmlData) => {
+    .then(({ htmlData, filesUrls }) => {
       fsp.writeFile(filepath, htmlData, 'utf-8');
-      const requests = urls.map((fileUrl) => axios({ method: 'get', url: fileUrl, responseType: 'stream' }));
-      return requests;
+      return filesUrls.map((fileUrl) => axios({ method: 'get', url: fileUrl, responseType: 'stream' }).catch(_.noop));
     })
     .then((requests) => Promise.all(requests))
     .then((responses) => {
-      responses.forEach((respons, i) => {
-        const { ext } = path.parse(urls[i]);
-        if (respons?.data) {
-          fsp.writeFile(path.join(pathToFileDirectory, `${renameFromUrl(urls[i])}${ext}`), respons.data);
+      responses.forEach((respons) => {
+        if (respons) {
+          const { url } = respons.config;
+          const { ext } = path.parse(url);
+          fsp.writeFile(path.join(pathToFileDirectory, `${renameFromUrl(url)}${ext}`), respons.data);
         }
       });
     })

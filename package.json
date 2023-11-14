@@ -1,13 +1,6 @@
 {
   "name": "@hexlet/code",
   "version": "1.0.0",
-<<<<<<< HEAD
-  "description": "pageLoader",
-  "type": "module",
-  "main": "index.js",
-  "scripts": {
-    "test": "npx jest"
-=======
   "description": "[![Actions Status](https://github.com/michaeldobosh/backend-project-4/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/michaeldobosh/backend-project-4/actions)",
   "main": "src/index.js",
   "type": "module",
@@ -17,32 +10,18 @@
   },
   "bin": {
     "page-loader": "bin/page-loader.js"
->>>>>>> f27d016876085599ba3e11649304af69c1f49f20
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/michaeldobosh/backend-project-4.git"
   },
-<<<<<<< HEAD
-  "author": "",
-=======
   "author": "Michael Dobosh",
->>>>>>> f27d016876085599ba3e11649304af69c1f49f20
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/michaeldobosh/backend-project-4/issues"
   },
   "homepage": "https://github.com/michaeldobosh/backend-project-4#readme",
   "devDependencies": {
-<<<<<<< HEAD
-    "eslint": "^8.52.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.28.1",
-    "jest": "^29.7.0"
-  },
-  "dependencies": {
-    "axios": "^1.5.1"
-=======
     "eslint": "^8.53.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.29.0",
@@ -53,7 +32,7 @@
   "dependencies": {
     "axios": "^1.6.1",
     "cheerio": "^1.0.0-rc.12",
-    "commander": "^11.1.0"
->>>>>>> f27d016876085599ba3e11649304af69c1f49f20
+    "commander": "^11.1.0",
+    "lodash": "^4.17.21"
   }
 }
