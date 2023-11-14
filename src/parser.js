@@ -10,38 +10,30 @@ export default (htmlData, host, directory) => {
   const $script = $('script');
   const filesUrls = [];
 
+  const changeHtmlCode = (i, el) => {
+    const url = el.attribs?.href ? el.attribs.href : el.attribs.src;
+    const fullUrl = new URL(url, host);
+    filesUrls.push(fullUrl.toString());
+
+    const pathToFile = path.parse(url).ext
+      ? path.join(directory, renameFromUrl(fullUrl))
+      : `${directory}/${renameFromUrl(fullUrl)}.html`;
+    if (el.attribs?.href) {
+      el.attribs.href = pathToFile;
+    } else {
+      el.attribs.src = pathToFile;
+    }
+  };
+
   $img
     .filter((i, { attribs: { src } }) => src && (!src?.includes('http') || src.includes(host)))
-    .each((i, el) => {
-      const fullUrl = new URL(el.attribs.src, host);
-      filesUrls.push(fullUrl.toString());
-      const { ext } = path.parse(el.attribs.src);
-      el.attribs.src = `${directory}/${renameFromUrl(fullUrl)}${ext}`;
-    });
+    .each(changeHtmlCode);
   $link
     .filter((i, { attribs: { href } }) => href && (!href?.includes('http') || href.includes(host)))
-    .filter((i, { attribs: { href } }) => path.parse(href).ext)
-    .each((i, el) => {
-      const fullUrl = new URL(el.attribs.href, host);
-      filesUrls.push(fullUrl.toString());
-      const { ext } = path.parse(el.attribs.href);
-      el.attribs.href = `${directory}/${renameFromUrl(fullUrl)}${ext}`;
-    });
-  $link
-    .filter((i, { attribs: { href } }) => href && (!href?.includes('http') || href.includes(host)))
-    .filter((i, { attribs: { href } }) => !path.parse(href).ext)
-    .each((i, el) => {
-      const fullUrl = new URL(el.attribs.href, host);
-      el.attribs.href = `${directory}/${renameFromUrl(fullUrl)}.html`;
-    });
+    .each(changeHtmlCode);
   $script
     .filter((i, { attribs: { src } }) => src && (!src?.includes('http') || src.includes(host)))
-    .each((i, el) => {
-      const fullUrl = new URL(el.attribs.src, host);
-      filesUrls.push(fullUrl.toString());
-      const { ext } = path.parse(el.attribs.src);
-      el.attribs.src = `${directory}/${renameFromUrl(fullUrl)}${ext}`;
-    });
+    .each(changeHtmlCode);
 
   return { htmlData: $.html(), filesUrls };
 };

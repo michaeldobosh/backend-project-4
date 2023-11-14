@@ -11,7 +11,7 @@ export default (link, output) => {
   const renamedUrl = renameFromUrl(requestUrl);
   const fileName = `${renamedUrl}.html`;
   const directoryFileName = `${renamedUrl}_files`;
-  const filepath = path.resolve(output, fileName);
+  const pathToFile = path.resolve(output, fileName);
   const pathToFileDirectory = path.join(output, directoryFileName);
 
   return axios.get(requestUrl.toString())
@@ -21,7 +21,7 @@ export default (link, output) => {
       return { htmlData, filesUrls };
     })
     .then(({ htmlData, filesUrls }) => {
-      fsp.writeFile(filepath, htmlData, 'utf-8');
+      fsp.writeFile(pathToFile, htmlData, 'utf-8');
       return filesUrls.map((fileUrl) => axios({ method: 'get', url: fileUrl, responseType: 'stream' }).catch(_.noop));
     })
     .then((requests) => Promise.all(requests))
@@ -29,11 +29,10 @@ export default (link, output) => {
       responses.forEach((respons) => {
         if (respons) {
           const { url } = respons.config;
-          const { ext } = path.parse(url);
-          fsp.writeFile(path.join(pathToFileDirectory, `${renameFromUrl(new URL(url))}${ext}`), respons.data);
+          fsp.writeFile(path.join(pathToFileDirectory, renameFromUrl(new URL(url))), respons.data);
         }
       });
     })
-    .then(() => filepath)
+    .then(() => pathToFile)
     .catch((err) => console.log(err.message));
 };
