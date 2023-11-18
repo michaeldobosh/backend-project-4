@@ -59,6 +59,7 @@ test('pageLoader', async () => {
 
 test('downloadingFiles', async () => {
   const dir = await fsp.readdir(tmp.pathToFileDirectory);
+  console.log(dir);
 
   expect(dir.includes(tmp.imgFileName)).toBeTruthy();
   expect(dir.includes(tmp.cssFileName)).toBeTruthy();

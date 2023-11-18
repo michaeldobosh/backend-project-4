@@ -1,16 +1,16 @@
 import path from 'path';
 import fsp from 'fs/promises';
 import axios from 'axios';
-import debug from 'debug';
-import axiosLogger from 'axios-debug-log';
+// import debug from 'debug';
+// import axiosLogger from 'axios-debug-log';
 
 import renameFromUrl from '../utils/renameFromUrl.js';
 import parser from './parser.js';
 
-const log = debug('http');
-const name = 'page-loader';
+// const log = debug('http');
+// const name = 'page-loader';
 
-log('booting %s', name);
+// log('booting %s', name);
 
 export default (link, output) => {
   const requestUrl = new URL(link);
