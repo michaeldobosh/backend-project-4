@@ -3,8 +3,14 @@ import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 import { tmpdir } from 'node:os';
 import fsp from 'fs/promises';
+import debug from 'debug';
 
 import pageLoader from '../src/index.js';
+
+const log = debug('nock');
+const name = 'page-loader';
+
+log('booting %s', name);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -59,7 +65,6 @@ test('pageLoader', async () => {
 
 test('downloadingFiles', async () => {
   const dir = await fsp.readdir(tmp.pathToFileDirectory);
-  console.log(dir);
 
   expect(dir.includes(tmp.imgFileName)).toBeTruthy();
   expect(dir.includes(tmp.cssFileName)).toBeTruthy();

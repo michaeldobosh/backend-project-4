@@ -30,13 +30,13 @@ export default (htmlData, host, directory) => {
   };
 
   $img
-    .filter((_i, { attribs: { src } }) => hasHostName(src, host))
+    .filter((_i, { attribs: { src } }) => src && hasHostName(src, host))
     .each(changeHtmlCode);
   $link
-    .filter((_i, { attribs: { href } }) => hasHostName(href, host))
+    .filter((_i, { attribs: { href } }) => href && hasHostName(href, host))
     .each(changeHtmlCode);
   $script
-    .filter((_i, { attribs: { src } }) => hasHostName(src, host))
+    .filter((_i, { attribs: { src } }) => src && hasHostName(src, host))
     .each(changeHtmlCode);
 
   return { htmlData: $.html(), filesUrls };

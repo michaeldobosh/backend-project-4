@@ -1,16 +1,17 @@
 import path from 'path';
 import fsp from 'fs/promises';
 import axios from 'axios';
-// import debug from 'debug';
-// import axiosLogger from 'axios-debug-log';
+import debug from 'debug';
+import { addLogger } from 'axios-debug-log';
 
 import renameFromUrl from '../utils/renameFromUrl.js';
 import parser from './parser.js';
 
-// const log = debug('http');
-// const name = 'page-loader';
+addLogger(axios);
+const log = debug('axios');
+const name = 'page-loader';
 
-// log('booting %s', name);
+log('booting %s', name);
 
 export default (link, output) => {
   const requestUrl = new URL(link);
@@ -22,6 +23,7 @@ export default (link, output) => {
 
   return axios.get(requestUrl.toString())
     .catch((error) => {
+      log('hello');
       if (error.response.status === 404) {
         const { url } = error.response.config;
         throw new Error(`Page ${url} not found`);
@@ -45,9 +47,6 @@ export default (link, output) => {
             console.log(`Error loading file "${url}"`);
           }
         }));
-    })
-    .catch(() => {
-      throw new Error('Data writing error');
     })
     .then((requests) => Promise.all(requests))
     .then((responses) => {
