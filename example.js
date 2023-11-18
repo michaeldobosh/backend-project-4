@@ -19,4 +19,11 @@ const second = {
 
 second.data = 'c';
 
-console.log(first);
+const link = new URL('https://jquery.com/');
+const { ext } = path.parse(link.toString());
+const linkWithoutExt = path
+  .join(link.host, link.pathname !== '/' ? link.pathname : '')
+  .replace(ext, '')
+  .replace(/\W/g, '-');
+
+console.log(link);
