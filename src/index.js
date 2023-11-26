@@ -23,15 +23,7 @@ export default (link, output) => {
 
   return axios.get(requestUrl.toString())
     .catch((error) => {
-      log('hello');
-      if (error.response.status === 404) {
-        const { url } = error.response.config;
-        throw new Error(`Page ${url} not found`);
-      }
-      if (error.response.status === 500) {
-        throw new Error('Network error');
-      }
-      throw new Error('Error, try again');
+      throw error;
     })
     .then(({ data }) => {
       const { htmlData, filesUrls } = parser(data, requestUrl.origin, directoryFileName);
@@ -40,23 +32,38 @@ export default (link, output) => {
     })
     .then(({ htmlData, filesUrls }) => {
       fsp.writeFile(pathToFile, htmlData, 'utf-8');
-      return filesUrls.map((fileUrl) => axios({ method: 'get', url: fileUrl, responseType: 'stream' })
-        .catch((error) => {
-          if (error.response.status === 404) {
-            const { url } = error.response.config;
-            console.log(`Error loading file "${url}"`);
-          }
-        }));
+      return filesUrls;
     })
+    .then((filesUrls) => filesUrls
+      .map((fileUrl) => axios({ method: 'get', url: fileUrl, responseType: 'stream' })
+        .catch((error) => {
+          if (error.response?.status === 404) {
+            const { url } = error.response.config;
+            console.error(`Error loading file "${url}"`);
+          }
+        })))
     .then((requests) => Promise.all(requests))
     .then((responses) => {
       responses.forEach((respons) => {
         if (respons?.status === 200) {
           const { url } = respons.config;
-          fsp.writeFile(path.join(pathToFileDirectory, renameFromUrl(new URL(url))), respons.data);
+          fsp.writeFile(path.join(pathToFileDirectory, renameFromUrl(new URL(url))), respons.data)
+            .catch((error) => {
+              throw error;
+            });
         }
       });
     })
     .then(() => `Page was successfully downloaded into ${pathToFile}`)
-    .catch((error) => error.message);
+    .catch((error) => {
+      console.log(process.exit());
+      if (error.response?.status === 404) {
+        const { url } = error.response.config;
+        return `Page ${url} not found`;
+      }
+      if (error.response?.status === 500) {
+        return 'Network error';
+      }
+      return `Error ${error.code}, try again`;
+    });
 };

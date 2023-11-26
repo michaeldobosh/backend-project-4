@@ -53,6 +53,7 @@ beforeEach(async () => {
   nock(tmp.base).get(tmp.url.img).reply(200, tmp.imgFile);
   nock(tmp.base).get(tmp.url.css).reply(200, tmp.cssFile);
   nock(tmp.base).get(tmp.url.js).reply(200, tmp.jsFile);
+  nock(tmp.base).get(tmp.url.js).reply(200, tmp.jsFile);
 
   await pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory);
 });
