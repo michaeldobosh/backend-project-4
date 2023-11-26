@@ -12,6 +12,6 @@ program
     `output dir (default: "${process.cwd()}")`,
     process.cwd(),
   )
-  .action((url, dir) => pageloader(url, dir.output).then(console.log));
+  .action((url, dir) => pageloader(url, dir.output).then(console.error));
 
 program.parse();

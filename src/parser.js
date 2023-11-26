@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import path from 'path';
 
 import renameFromUrl from '../utils/renameFromUrl.js';
+import hasHostName from '../utils/hasHostName.js';
 
 export default (htmlData, host, directory) => {
   const $ = cheerio.load(htmlData);
@@ -12,10 +13,13 @@ export default (htmlData, host, directory) => {
 
   const changeHtmlCode = (i, el) => {
     const url = el.attribs?.href ? el.attribs.href : el.attribs.src;
+    const isFile = path.parse(url).ext;
     const fullUrl = new URL(url, host);
-    filesUrls.push(fullUrl.toString());
+    if (isFile) {
+      filesUrls.push(fullUrl.toString());
+    }
 
-    const pathToFile = path.parse(url).ext
+    const pathToFile = isFile
       ? path.join(directory, renameFromUrl(fullUrl))
       : `${directory}/${renameFromUrl(fullUrl)}.html`;
     if (el.attribs?.href) {
@@ -26,13 +30,13 @@ export default (htmlData, host, directory) => {
   };
 
   $img
-    .filter((i, { attribs: { src } }) => src && (!src?.includes('http') || src.includes(host)))
+    .filter((_i, { attribs: { src } }) => src && hasHostName(src, host))
     .each(changeHtmlCode);
   $link
-    .filter((i, { attribs: { href } }) => href && (!href?.includes('http') || href.includes(host)))
+    .filter((_i, { attribs: { href } }) => href && hasHostName(href, host))
     .each(changeHtmlCode);
   $script
-    .filter((i, { attribs: { src } }) => src && (!src?.includes('http') || src.includes(host)))
+    .filter((_i, { attribs: { src } }) => src && hasHostName(src, host))
     .each(changeHtmlCode);
 
   return { htmlData: $.html(), filesUrls };
