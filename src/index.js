@@ -20,17 +20,13 @@ export default (link, output) => {
   const directoryFileName = `${renamedUrl}_files`;
   const pathToFile = path.resolve(output, fileName);
   const pathToFileDirectory = path.join(output, directoryFileName);
+  let loadedData;
 
   return axios.get(requestUrl.toString())
-    .catch((error) => {
-      throw error;
-    })
-    .then(({ data }) => {
-      const { htmlData, filesUrls } = parser(data, requestUrl.origin, directoryFileName);
-      fsp.mkdir(pathToFileDirectory);
-      return { htmlData, filesUrls };
-    })
-    .then(({ htmlData, filesUrls }) => {
+    .then(({ data }) => { loadedData = data; })
+    .then(() => fsp.mkdir(pathToFileDirectory))
+    .then(() => {
+      const { htmlData, filesUrls } = parser(loadedData, requestUrl.origin, directoryFileName);
       fsp.writeFile(pathToFile, htmlData, 'utf-8');
       return filesUrls;
     })
@@ -56,14 +52,22 @@ export default (link, output) => {
     })
     .then(() => `Page was successfully downloaded into ${pathToFile}`)
     .catch((error) => {
-      console.log(process.exit());
-      if (error.response?.status === 404) {
-        const { url } = error.response.config;
-        return `Page ${url} not found`;
+      // console.log(error);
+      // console.log(process.exit(error.code));
+
+      if (error.errno === -2) {
+        return `Cannot write ${error.path}: no such file or directory '${path.parse(error.path).dir}'`;
+      }
+      if (error.errno === -13) {
+        return `Cannot write ${error.path}: Permission denied`;
+      }
+      if (error.errno === -17) {
+        return `Cannot write ${error.path}: a file or directory with the specified name already exists`;
       }
       if (error.response?.status === 500) {
         return 'Network error';
       }
-      return `Error ${error.code}, try again`;
+      const url = error?.config?.url;
+      return `Page ${url} not found`;
     });
 };

@@ -22,6 +22,7 @@ const tmp = {
     img: '/assets/professions/nodejs.png',
     css: '/assets/application.css',
     js: '/packs/js/runtime.js',
+    arbitraryUrl: '/arbitrary',
   },
   fileName: 'ru-hexlet-io-courses.html',
   fileNameWithChanges: 'ru-hexlet-io-courses-after.html',
@@ -30,6 +31,7 @@ const tmp = {
   cssFileName: 'ru-hexlet-io-assets-application.css',
   jsFileName: 'ru-hexlet-io-packs-js-runtime.js',
   wrongFileName: 'cdn2-hexlet-io-assets-menu.css',
+  fileDirectoryNameArbitrary: 'ru-hexlet-io-arbitrary_files',
   pathToFixtures: path.resolve(__dirname, '..', '__fixtures__'),
 };
 
@@ -53,7 +55,6 @@ beforeEach(async () => {
   nock(tmp.base).get(tmp.url.img).reply(200, tmp.imgFile);
   nock(tmp.base).get(tmp.url.css).reply(200, tmp.cssFile);
   nock(tmp.base).get(tmp.url.js).reply(200, tmp.jsFile);
-  nock(tmp.base).get(tmp.url.js).reply(200, tmp.jsFile);
 
   await pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory);
 });
@@ -71,4 +72,17 @@ test('downloadingFiles', async () => {
   expect(dir.includes(tmp.cssFileName)).toBeTruthy();
   expect(dir.includes(tmp.jsFileName)).toBeTruthy();
   expect(dir.includes(tmp.wrongFileName)).toBeFalsy();
+});
+
+test('non-existent premissions to write', async () => {
+  await fsp.chmod(tmp.pathToDirectory, '555');
+  nock(tmp.base).get(tmp.url.arbitraryUrl).reply(200, tmp.dataFile);
+  const result = await pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, tmp.pathToDirectory);
+  expect(result).toEqual(`Cannot write ${path.join(tmp.pathToDirectory, tmp.fileDirectoryNameArbitrary)}: Permission denied`);
+});
+
+test('non-existent path', async () => {
+  nock(tmp.base).get(tmp.url.arbitraryUrl).reply(200, tmp.dataFile);
+  const result = await pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, 'non-existent-directory');
+  expect(result.includes('no such file or directory')).toBeTruthy();
 });
