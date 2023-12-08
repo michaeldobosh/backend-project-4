@@ -51,18 +51,24 @@ beforeEach(async () => {
   tmp.pathToDirectory = await fsp.mkdtemp(path.join(tmpdir(), 'page-loader-'));
   tmp.pathToFileDirectory = path.join(tmp.pathToDirectory, tmp.fileDirectoryName);
 
-  nock(tmp.base).get(tmp.url.courses).reply(200, tmp.dataFile);
-  nock(tmp.base).get(tmp.url.courses).reply(200, tmp.dataFile);
-  nock(tmp.base).get(tmp.url.courses).reply(200, tmp.dataFile);
-  nock(tmp.base).get(tmp.url.img).reply(200, tmp.imgFile);
-  nock(tmp.base).get(tmp.url.css).reply(200, tmp.cssFile);
-  nock(tmp.base).get(tmp.url.js).reply(200, tmp.jsFile);
-  nock(tmp.base).get(tmp.url.arbitraryUrl).reply(200, tmp.dataFile);
+  nock(tmp.base).get(tmp.url.courses).reply(200, tmp.dataFile)
+    .get(tmp.url.courses)
+    .reply(200, tmp.dataFile)
+    .get(tmp.url.courses)
+    .reply(200, tmp.dataFile)
+    .get(tmp.url.img)
+    .reply(200, tmp.imgFile)
+    .get(tmp.url.css)
+    .reply(200, tmp.cssFile)
+    .get(tmp.url.js)
+    .reply(200, tmp.jsFile)
+    .get(tmp.url.arbitraryUrl)
+    .reply(200, tmp.dataFile);
 
   await pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory);
 });
 
-test('pageLoader', async () => {
+test('parsing', async () => {
   const pathToFile = path.join(tmp.pathToDirectory, tmp.fileName);
   const dataFile = await fsp.readFile(pathToFile, 'utf-8');
   expect(dataFile).toEqual(tmp.dataFileWithChanges);
@@ -77,40 +83,19 @@ test('downloadingFiles', async () => {
   expect(dir.includes(tmp.wrongFileName)).toBeFalsy();
 });
 
-test('non-existent premissions to write', async () => {
-  expect.assertions(1);
-  let err;
+test('non existent premissions to write', async () => {
   await fsp.chmod(tmp.pathToDirectory, '555');
-  try {
-    await pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, tmp.pathToDirectory);
-  } catch (e) {
-    err = e;
-  } finally {
-    expect(err.message).toMatch('permission denied');
-  }
+  await expect(pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, tmp.pathToDirectory))
+    .rejects.toThrow('permission denied');
 });
 
-test('non-existent path', async () => {
-  expect.assertions(1);
-  let err;
-  try {
-    await pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, 'non-existent-directory');
-  } catch (e) {
-    err = e;
-  } finally {
-    expect(err.message).toMatch('no such file or directory');
-  }
+test('non existent path', async () => {
+  await expect(pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, 'non-existent-directory'))
+    .rejects.toThrow('no such file or directory');
 });
 
 test('no response', async () => {
-  expect.assertions(1);
-  nock(tmp.base).get(tmp.url.courses).replyWithError('badsite');
-  let err;
-  try {
-    await pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory);
-  } catch (e) {
-    err = e;
-  } finally {
-    expect(err.message).toMatch('badsite');
-  }
+  nock(tmp.base).get(tmp.url.courses).reply(504);
+  await expect(pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory))
+    .rejects.toThrow('Request failed with status code 504');
 });
