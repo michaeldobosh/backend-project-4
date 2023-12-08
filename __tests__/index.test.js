@@ -95,7 +95,12 @@ test('non existent path', async () => {
 });
 
 test('no response', async () => {
-  nock(tmp.base).get(tmp.url.courses).reply(404);
+  nock(tmp.base)
+    .get(tmp.url.courses)
+    .reply(404);
+  nock(tmp.base)
+    .get(tmp.url.img)
+    .reply(404);
   await expect(pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory))
     .rejects.toThrow('Request failed with status code 404');
 });
