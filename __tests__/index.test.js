@@ -104,13 +104,13 @@ test('non-existent path', async () => {
 
 test('no response', async () => {
   expect.assertions(1);
-  nock(tmp.base).get(tmp.url.courses).replyWithError('ENOENT');
+  nock(tmp.base).get(tmp.url.courses).replyWithError('badsite');
   let err;
   try {
     await pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory);
   } catch (e) {
     err = e;
   } finally {
-    expect(err.message).toMatch('ENOENT');
+    expect(err.message).toMatch('badsite');
   }
 });

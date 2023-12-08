@@ -25,11 +25,10 @@ program
       if (error.errno === -17) {
         return `Cannot write ${error.path}: already exists`;
       }
-      if (error.response?.status === 500) {
-        return 'Network error';
+      if (error.errno === -3001 || error.errno === -3008) {
+        return 'No response';
       }
-      const fileUrl = error?.config?.url;
-      return `Page ${fileUrl} not found`;
+      return error;
     })
     .then(console.error));
 
