@@ -15,9 +15,10 @@ const name = 'page-loader';
 
 log('booting %s', name);
 
-export default (link, output) => {
+export default (link, output = '') => {
   const requestUrl = new URL(link);
   const fileName = renameFromUrl(requestUrl);
+  console.log(fileName);
   const directoryFileName = fileName.replace('.html', '_files');
   const pathToFile = path.resolve(output, fileName);
   const pathToFileDirectory = path.join(output, directoryFileName);
