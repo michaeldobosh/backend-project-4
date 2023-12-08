@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import path from 'path';
+import _ from 'lodash';
 
 import renameFromUrl from '../utils/renameFromUrl.js';
 import hasHostName from '../utils/hasHostName.js';
@@ -13,15 +14,10 @@ export default (htmlData, host, directory) => {
 
   const changeHtmlCode = (i, el) => {
     const url = el.attribs?.href ? el.attribs.href : el.attribs.src;
-    const isFile = path.parse(url).ext;
     const fullUrl = new URL(url, host);
-    if (isFile) {
-      filesUrls.push(fullUrl.toString());
-    }
+    filesUrls.push(fullUrl.toString());
 
-    const pathToFile = isFile
-      ? path.join(directory, renameFromUrl(fullUrl))
-      : `${directory}/${renameFromUrl(fullUrl)}.html`;
+    const pathToFile = path.join(directory, renameFromUrl(fullUrl));
     if (el.attribs?.href) {
       el.attribs.href = pathToFile;
     } else {
@@ -39,5 +35,6 @@ export default (htmlData, host, directory) => {
     .filter((_i, { attribs: { src } }) => src && hasHostName(src, host))
     .each(changeHtmlCode);
 
-  return { htmlData: $.html(), filesUrls };
+  const urls = _.uniq(filesUrls);
+  return { htmlData: $.html(), urls };
 };

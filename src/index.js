@@ -17,9 +17,8 @@ log('booting %s', name);
 
 export default (link, output) => {
   const requestUrl = new URL(link);
-  const renamedUrl = renameFromUrl(requestUrl);
-  const fileName = `${renamedUrl}.html`;
-  const directoryFileName = `${renamedUrl}_files`;
+  const fileName = renameFromUrl(requestUrl);
+  const directoryFileName = fileName.replace('.html', '_files');
   const pathToFile = path.resolve(output, fileName);
   const pathToFileDirectory = path.join(output, directoryFileName);
   const tasks = [{ title: link, task: () => axios.get(link) }];
@@ -29,9 +28,9 @@ export default (link, output) => {
     .then(({ data }) => { loadedData = data; })
     .then(() => fsp.mkdir(pathToFileDirectory))
     .then(() => {
-      const { htmlData, filesUrls } = parser(loadedData, requestUrl.origin, directoryFileName);
+      const { htmlData, urls } = parser(loadedData, requestUrl.origin, directoryFileName);
       fsp.writeFile(pathToFile, htmlData, 'utf-8');
-      tasks.push(...filesUrls.map((url) => ({
+      tasks.push(...urls.map((url) => ({
         title: url,
         task: (_stx, task) => axios({ method: 'get', url, responseType: 'stream' }).catch((error) => {
           if (error.response?.status === 404) {
@@ -39,9 +38,9 @@ export default (link, output) => {
           }
         }),
       })));
-      return filesUrls;
+      return urls;
     })
-    .then((filesUrls) => filesUrls
+    .then((urls) => urls
       .map((fileUrl) => axios({ method: 'get', url: fileUrl, responseType: 'stream' })
         .catch(() => _.noop)))
     .then((requests) => Promise.all(requests))
@@ -61,5 +60,4 @@ export default (link, output) => {
       return listr.run();
     })
     .then(() => pathToFile);
-  // .catch((error) => error);
 };

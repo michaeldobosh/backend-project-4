@@ -53,6 +53,7 @@ beforeEach(async () => {
 
   nock(tmp.base).get(tmp.url.courses).reply(200, tmp.dataFile);
   nock(tmp.base).get(tmp.url.courses).reply(200, tmp.dataFile);
+  nock(tmp.base).get(tmp.url.courses).reply(200, tmp.dataFile);
   nock(tmp.base).get(tmp.url.img).reply(200, tmp.imgFile);
   nock(tmp.base).get(tmp.url.css).reply(200, tmp.cssFile);
   nock(tmp.base).get(tmp.url.js).reply(200, tmp.jsFile);
