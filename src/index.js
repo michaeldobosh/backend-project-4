@@ -3,6 +3,8 @@ import fsp from 'fs/promises';
 import axios from 'axios';
 import debug from 'debug';
 import { addLogger } from 'axios-debug-log';
+import Listr from 'listr';
+import _ from 'lodash';
 
 import renameFromUrl from '../utils/renameFromUrl.js';
 import parser from './parser.js';
@@ -20,6 +22,7 @@ export default (link, output) => {
   const directoryFileName = `${renamedUrl}_files`;
   const pathToFile = path.resolve(output, fileName);
   const pathToFileDirectory = path.join(output, directoryFileName);
+  const tasks = [{ title: link, task: () => axios.get(link) }];
   let loadedData;
 
   return axios.get(requestUrl.toString())
@@ -28,16 +31,19 @@ export default (link, output) => {
     .then(() => {
       const { htmlData, filesUrls } = parser(loadedData, requestUrl.origin, directoryFileName);
       fsp.writeFile(pathToFile, htmlData, 'utf-8');
+      tasks.push(...filesUrls.map((url) => ({
+        title: url,
+        task: (_stx, task) => axios({ method: 'get', url, responseType: 'stream' }).catch((error) => {
+          if (error.response?.status === 404) {
+            task.skip(`Error loading file "${url}"`);
+          }
+        }),
+      })));
       return filesUrls;
     })
     .then((filesUrls) => filesUrls
       .map((fileUrl) => axios({ method: 'get', url: fileUrl, responseType: 'stream' })
-        .catch((error) => {
-          if (error.response?.status === 404) {
-            const { url } = error.response.config;
-            console.error(`Error loading file "${url}"`);
-          }
-        })))
+        .catch(() => _.noop)))
     .then((requests) => Promise.all(requests))
     .then((responses) => {
       responses.forEach((respons) => {
@@ -50,11 +56,12 @@ export default (link, output) => {
         }
       });
     })
+    .then(() => {
+      const listr = new Listr(tasks, { concurrent: true });
+      return listr.run();
+    })
     .then(() => `Page was successfully downloaded into ${pathToFile}`)
     .catch((error) => {
-      // console.log(error);
-      // console.log(process.exit(error.code));
-
       if (error.errno === -2) {
         return `Cannot write ${error.path}: no such file or directory '${path.parse(error.path).dir}'`;
       }
@@ -62,7 +69,7 @@ export default (link, output) => {
         return `Cannot write ${error.path}: Permission denied`;
       }
       if (error.errno === -17) {
-        return `Cannot write ${error.path}: a file or directory with the specified name already exists`;
+        return `Cannot write ${error.path}: already exists`;
       }
       if (error.response?.status === 500) {
         return 'Network error';
