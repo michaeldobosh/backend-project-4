@@ -50,7 +50,9 @@ beforeAll(async () => {
 beforeEach(async () => {
   tmp.pathToDirectory = await fsp.mkdtemp(path.join(tmpdir(), 'page-loader-'));
   tmp.pathToFileDirectory = path.join(tmp.pathToDirectory, tmp.fileDirectoryName);
+});
 
+test('parsing/downloadingFiles', async () => {
   nock(tmp.base).get(tmp.url.courses).reply(200, tmp.dataFile)
     .get(tmp.url.courses)
     .reply(200, tmp.dataFile)
@@ -61,22 +63,15 @@ beforeEach(async () => {
     .get(tmp.url.css)
     .reply(200, tmp.cssFile)
     .get(tmp.url.js)
-    .reply(200, tmp.jsFile)
-    .get(tmp.url.arbitraryUrl)
-    .reply(200, tmp.dataFile);
+    .reply(200, tmp.jsFile);
 
   await pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory);
-});
 
-test('parsing', async () => {
   const pathToFile = path.join(tmp.pathToDirectory, tmp.fileName);
   const dataFile = await fsp.readFile(pathToFile, 'utf-8');
-  expect(dataFile).toEqual(tmp.dataFileWithChanges);
-});
-
-test('downloadingFiles', async () => {
   const dir = await fsp.readdir(tmp.pathToFileDirectory);
 
+  expect(dataFile).toEqual(tmp.dataFileWithChanges);
   expect(dir.includes(tmp.imgFileName)).toBeTruthy();
   expect(dir.includes(tmp.cssFileName)).toBeTruthy();
   expect(dir.includes(tmp.jsFileName)).toBeTruthy();
@@ -84,23 +79,21 @@ test('downloadingFiles', async () => {
 });
 
 test('non existent premissions to write', async () => {
+  nock(tmp.base).get(tmp.url.arbitraryUrl).reply(200, tmp.dataFile);
   await fsp.chmod(tmp.pathToDirectory, '555');
   await expect(pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, tmp.pathToDirectory))
     .rejects.toThrow('permission denied');
 });
 
 test('non existent path', async () => {
+  nock(tmp.base).get(tmp.url.arbitraryUrl).reply(200, tmp.dataFile);
   await expect(pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, 'non-existent-directory'))
     .rejects.toThrow('no such file or directory');
 });
 
 test('no response', async () => {
-  nock(tmp.base)
-    .get(tmp.url.courses)
-    .reply(404);
-  nock(tmp.base)
-    .get(tmp.url.img)
-    .reply(404);
+  nock(tmp.base).get(tmp.url.courses).reply(404);
+  nock(tmp.base).get(tmp.url.img).reply(404);
   await expect(pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory))
     .rejects.toThrow('Request failed with status code 404');
 });
