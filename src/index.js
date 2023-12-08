@@ -60,21 +60,5 @@ export default (link, output) => {
       const listr = new Listr(tasks, { concurrent: true });
       return listr.run();
     })
-    .then(() => `Page was successfully downloaded into ${pathToFile}`)
-    .catch((error) => {
-      if (error.errno === -2) {
-        return `Cannot write ${error.path}: no such file or directory '${path.parse(error.path).dir}'`;
-      }
-      if (error.errno === -13) {
-        return `Cannot write ${error.path}: Permission denied`;
-      }
-      if (error.errno === -17) {
-        return `Cannot write ${error.path}: already exists`;
-      }
-      if (error.response?.status === 500) {
-        return 'Network error';
-      }
-      const url = error?.config?.url;
-      return `Page ${url} not found`;
-    });
+    .then(() => `Page was successfully downloaded into ${pathToFile}`);
 };
