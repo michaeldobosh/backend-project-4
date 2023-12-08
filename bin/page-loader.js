@@ -14,6 +14,7 @@ program
     process.cwd(),
   )
   .action((url, dir) => pageloader(url, dir.output)
+    .then((pathToFile) => `Page was successfully downloaded into ${pathToFile}`)
     .catch((error) => {
       if (error.errno === -2) {
         return `Cannot write ${error.path}: no such file or directory '${path.parse(error.path).dir}'`;

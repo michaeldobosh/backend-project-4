@@ -60,5 +60,6 @@ export default (link, output) => {
       const listr = new Listr(tasks, { concurrent: true });
       return listr.run();
     })
-    .then(() => `Page was successfully downloaded into ${pathToFile}`);
+    .then(() => pathToFile);
+  // .catch((error) => error);
 };

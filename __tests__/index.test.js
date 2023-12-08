@@ -52,9 +52,11 @@ beforeEach(async () => {
   tmp.pathToFileDirectory = path.join(tmp.pathToDirectory, tmp.fileDirectoryName);
 
   nock(tmp.base).get(tmp.url.courses).reply(200, tmp.dataFile);
+  nock(tmp.base).get(tmp.url.courses).reply(200, tmp.dataFile);
   nock(tmp.base).get(tmp.url.img).reply(200, tmp.imgFile);
   nock(tmp.base).get(tmp.url.css).reply(200, tmp.cssFile);
   nock(tmp.base).get(tmp.url.js).reply(200, tmp.jsFile);
+  nock(tmp.base).get(tmp.url.arbitraryUrl).reply(200, tmp.dataFile);
 
   await pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory);
 });
@@ -75,14 +77,21 @@ test('downloadingFiles', async () => {
 });
 
 test('non-existent premissions to write', async () => {
+  expect.assertions(1);
   await fsp.chmod(tmp.pathToDirectory, '555');
-  nock(tmp.base).get(tmp.url.arbitraryUrl).reply(200, tmp.dataFile);
-  const result = await pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, tmp.pathToDirectory);
-  expect(result).toEqual(`Cannot write ${path.join(tmp.pathToDirectory, tmp.fileDirectoryNameArbitrary)}: Permission denied`);
+  try {
+    await pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, tmp.pathToDirectory);
+  } catch (e) {
+    expect(e.message).toMatch('permission denied');
+  }
 });
 
 test('non-existent path', async () => {
-  nock(tmp.base).get(tmp.url.arbitraryUrl).reply(200, tmp.dataFile);
-  const result = await pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, 'non-existent-directory');
-  expect(result.includes('no such file or directory')).toBeTruthy();
+  expect.assertions(1);
+  await fsp.chmod(tmp.pathToDirectory, '555');
+  try {
+    await pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, 'non-existent-directory');
+  } catch (e) {
+    expect(e.message).toMatch('no such file or directory');
+  }
 });
