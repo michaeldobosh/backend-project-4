@@ -28,7 +28,7 @@ program
       if (error.errno === -3001 || error.errno === -3008) {
         return 'No response';
       }
-      return error;
+      return error.message;
     })
     .then(console.error));
 
