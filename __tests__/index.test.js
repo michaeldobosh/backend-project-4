@@ -101,3 +101,16 @@ test('non-existent path', async () => {
     expect(err.message).toMatch('no such file or directory');
   }
 });
+
+test('no response', async () => {
+  expect.assertions(1);
+  nock(tmp.base).get(tmp.url.courses).replyWithError('getaddrinfo EAI_AGAIN badsite');
+  let err;
+  try {
+    await pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory);
+  } catch (e) {
+    err = e;
+  } finally {
+    expect(err.message).toMatch('getaddrinfo EAI_AGAIN badsite');
+  }
+});
