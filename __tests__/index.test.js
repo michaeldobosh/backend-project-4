@@ -7,6 +7,8 @@ import debug from 'debug';
 
 import pageLoader from '../src/index.js';
 
+nock.disableNetConnect();
+
 const log = debug('nock');
 const name = 'page-loader';
 
