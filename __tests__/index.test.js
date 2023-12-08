@@ -104,13 +104,13 @@ test('non-existent path', async () => {
 
 test('no response', async () => {
   expect.assertions(1);
-  nock(tmp.base).get(tmp.url.courses).replyWithError('getaddrinfo EAI_AGAIN badsite');
+  nock(tmp.base).get(tmp.url.courses).replyWithError('ENOENT');
   let err;
   try {
     await pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory);
   } catch (e) {
     err = e;
   } finally {
-    expect(err.message).toMatch('getaddrinfo EAI_AGAIN badsite');
+    expect(err.message).toMatch('ENOENT');
   }
 });
