@@ -78,20 +78,25 @@ test('downloadingFiles', async () => {
 
 test('non-existent premissions to write', async () => {
   expect.assertions(1);
+  let err;
   await fsp.chmod(tmp.pathToDirectory, '555');
   try {
     await pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, tmp.pathToDirectory);
   } catch (e) {
-    expect(e.message).toMatch('permission denied');
+    err = e;
+  } finally {
+    expect(err.message).toMatch('permission denied');
   }
 });
 
 test('non-existent path', async () => {
   expect.assertions(1);
-  await fsp.chmod(tmp.pathToDirectory, '555');
+  let err;
   try {
     await pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, 'non-existent-directory');
   } catch (e) {
-    expect(e.message).toMatch('no such file or directory');
+    err = e;
+  } finally {
+    expect(err.message).toMatch('no such file or directory');
   }
 });
