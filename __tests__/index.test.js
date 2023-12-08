@@ -50,6 +50,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  nock.cleanAll();
   tmp.pathToDirectory = await fsp.mkdtemp(path.join(tmpdir(), 'page-loader-'));
   tmp.pathToFileDirectory = path.join(tmp.pathToDirectory, tmp.fileDirectoryName);
 });
