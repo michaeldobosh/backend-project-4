@@ -11,7 +11,7 @@ parserOptions:
   ecmaVersion: latest
 rules: 
   no-restricted-syntax: ["off", "ForOfStatement"]
-  no-param-reassign: ["error", { "props": false }]
+  no-param-reassign: 0
   no-console: 0
   import/extensions: # FIXME: remove when rule will be adjusted for new nodejs version
     - error

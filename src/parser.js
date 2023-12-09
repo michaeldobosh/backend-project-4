@@ -3,7 +3,8 @@ import path from 'path';
 import _ from 'lodash';
 
 import renameFromUrl from '../utils/renameFromUrl.js';
-import hasHostName from '../utils/hasHostName.js';
+
+const hasHostName = (link, host) => (new URL(link, host).toString()).includes(host);
 
 export default (htmlData, host, directory) => {
   const $ = cheerio.load(htmlData);
@@ -19,9 +20,9 @@ export default (htmlData, host, directory) => {
 
     const pathToFile = path.join(directory, renameFromUrl(fullUrl));
     if (el.attribs?.href) {
-      el.attribs.href = pathToFile;
+      el.attribs.href = pathToFile; // eslint-disable-line no-param-reassign
     } else {
-      el.attribs.src = pathToFile;
+      el.attribs.src = pathToFile; // eslint-disable-line no-param-reassign
     }
   };
 
