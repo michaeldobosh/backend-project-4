@@ -56,17 +56,10 @@ beforeEach(async () => {
 });
 
 test('parsing/downloadingFiles', async () => {
-  nock(tmp.base).get(tmp.url.courses).reply(200, tmp.dataFile)
-    .get(tmp.url.courses)
-    .reply(200, tmp.dataFile)
-    .get(tmp.url.courses)
-    .reply(200, tmp.dataFile)
-    .get(tmp.url.img)
-    .reply(200, tmp.imgFile)
-    .get(tmp.url.css)
-    .reply(200, tmp.cssFile)
-    .get(tmp.url.js)
-    .reply(200, tmp.jsFile);
+  nock(tmp.base).persist().get(tmp.url.courses).reply(200, tmp.dataFile);
+  nock(tmp.base).get(tmp.url.img).reply(200, tmp.imgFile);
+  nock(tmp.base).get(tmp.url.css).reply(200, tmp.cssFile);
+  nock(tmp.base).get(tmp.url.js).reply(200, tmp.jsFile);
 
   await pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory);
 
@@ -94,9 +87,18 @@ test('non existent path', async () => {
     .rejects.toThrow('no such file or directory');
 });
 
+// test('file already exists', async () => {
+//   nock(tmp.base).persist().get(tmp.url.img).reply(200, tmp.imgFile);
+//   await pageLoader(`${tmp.base}${tmp.url.img}`, tmp.pathToDirectory);
+//   await expect(await pageLoader(`${tmp.base}${tmp.url.img}`, tmp.pathToDirectory))
+//     .rejects.toThrow('file already exists');
+//   await expect(await pageLoader(`${tmp.base}${tmp.url.img}`, tmp.pathToDirectory))
+//     .rejects.toThrow('illegal operation on a directory');
+// });
+
 test('no response', async () => {
   nock(tmp.base).get(tmp.url.courses).reply(404, tmp.dataFile);
   nock(tmp.base).get(tmp.url.img).reply(404, tmp.imgFile);
   await expect(pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory))
-    .rejects.toThrow(new Error('Request failed with status code 404'));
+    .rejects.toThrow('Request failed with status code 404');
 });
