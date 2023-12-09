@@ -18,19 +18,15 @@ program
     .catch((error) => {
       if (error.errno === -2) {
         console.error(`Cannot write ${error.path}: no such file or directory '${path.parse(error.path).dir}'`);
-        process.exit(1);
       }
       if (error.errno === -13) {
         console.error(`Cannot write ${error.path}: Permission denied`);
-        process.exit(1);
       }
       if (error.errno === -17) {
         console.error(`Cannot write ${error.path}: already exists`);
-        process.exit(1);
       }
       if (error.errno === -3001 || error.errno === -3008) {
         console.error('No response');
-        process.exit(1);
       }
       process.exit(1);
     }));

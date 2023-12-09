@@ -87,15 +87,6 @@ test('non existent path', async () => {
     .rejects.toThrow('no such file or directory');
 });
 
-// test('file already exists', async () => {
-//   nock(tmp.base).persist().get(tmp.url.img).reply(200, tmp.imgFile);
-//   await pageLoader(`${tmp.base}${tmp.url.img}`, tmp.pathToDirectory);
-//   await expect(await pageLoader(`${tmp.base}${tmp.url.img}`, tmp.pathToDirectory))
-//     .rejects.toThrow('file already exists');
-//   await expect(await pageLoader(`${tmp.base}${tmp.url.img}`, tmp.pathToDirectory))
-//     .rejects.toThrow('illegal operation on a directory');
-// });
-
 test('no response', async () => {
   nock(tmp.base).get(tmp.url.courses).reply(404, tmp.dataFile);
   nock(tmp.base).get(tmp.url.img).reply(404, tmp.imgFile);
