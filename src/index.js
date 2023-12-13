@@ -11,8 +11,9 @@ import parser from './parser.js';
 
 addLogger(axios);
 
-const log = debug('page-loader');
-log('booting %s', 'page-loader');
+const namespace = 'page-loader';
+const log = debug(namespace);
+log('booting %s', namespace);
 
 export default (link, output = '') => {
   const requestUrl = new URL(link);
