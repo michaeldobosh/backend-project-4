@@ -1,3 +1,4 @@
 /page-loader/
 /node_modules/
 coverage
+.env

@@ -7,5 +7,5 @@ export default (link) => {
     .join(link.host, isMain ? '' : link.pathname)
     .replace(ext, '')
     .replace(/\W/g, '-');
-  return `${linkWithoutExt}${isMain ? '' : ext || '.html'}`;
+  return `${linkWithoutExt}${isMain ? `${ext}.html` : ext || '.html'}`;
 };

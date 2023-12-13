@@ -13,11 +13,17 @@ export default (htmlData, host, directory) => {
   const $script = $('script');
   const filesUrls = [];
 
-  const changeHtmlCode = (i, el) => {
-    const url = el.attribs?.href ? el.attribs.href : el.attribs.src;
-    const fullUrl = new URL(url, host);
-    filesUrls.push(fullUrl.toString());
+  const formFullUrl = (htmlElement) => {
+    const url = htmlElement.attribs?.href
+      ? htmlElement.attribs.href
+      : htmlElement.attribs.src;
+    return new URL(url, host);
+  };
 
+  const extractLinks = (_i, el) => filesUrls.push(formFullUrl(el).toString());
+
+  const changeHtmlCode = (_i, el) => {
+    const fullUrl = formFullUrl(el);
     const pathToFile = path.join(directory, renameFromUrl(fullUrl));
     if (el.attribs?.href) {
       el.attribs.href = pathToFile; // eslint-disable-line no-param-reassign
@@ -28,13 +34,13 @@ export default (htmlData, host, directory) => {
 
   $img
     .filter((_i, { attribs: { src } }) => src && hasHostName(src, host))
-    .each(changeHtmlCode);
+    .each(extractLinks).each(changeHtmlCode);
   $link
     .filter((_i, { attribs: { href } }) => href && hasHostName(href, host))
-    .each(changeHtmlCode);
+    .each(extractLinks).each(changeHtmlCode);
   $script
     .filter((_i, { attribs: { src } }) => src && hasHostName(src, host))
-    .each(changeHtmlCode);
+    .each(extractLinks).each(changeHtmlCode);
 
   const urls = _.uniq(filesUrls);
   return { htmlData: $.html(), urls };

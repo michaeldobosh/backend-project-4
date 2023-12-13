@@ -3,16 +3,8 @@ import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 import { tmpdir } from 'node:os';
 import fsp from 'fs/promises';
-import debug from 'debug';
 
 import pageLoader from '../src/index.js';
-
-nock.disableNetConnect();
-
-const log = debug('nock');
-const name = 'page-loader';
-
-log('booting %s', name);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -24,72 +16,65 @@ const tmp = {
     img: '/assets/professions/nodejs.png',
     css: '/assets/application.css',
     js: '/packs/js/runtime.js',
-    arbitraryUrl: '/arbitrary',
   },
-  fileName: 'ru-hexlet-io-courses.html',
-  fileNameWithChanges: 'ru-hexlet-io-courses-after.html',
-  fileDirectoryName: 'ru-hexlet-io-courses_files',
-  imgFileName: 'ru-hexlet-io-assets-professions-nodejs.png',
-  cssFileName: 'ru-hexlet-io-assets-application.css',
-  jsFileName: 'ru-hexlet-io-packs-js-runtime.js',
-  wrongFileName: 'cdn2-hexlet-io-assets-menu.css',
-  fileDirectoryNameArbitrary: 'ru-hexlet-io-arbitrary_files',
-  pathToFixtures: path.resolve(__dirname, '..', '__fixtures__'),
+  htmlFileName: 'ru-hexlet-io-courses.html',
+  htmlFixtureName: 'ru-hexlet-io-courses-after.html',
+  getFixturePath: (filename) => path.resolve(__dirname, '..', '__fixtures__', filename),
 };
 
 beforeAll(async () => {
-  const pathToFile = path.join(tmp.pathToFixtures, tmp.fileName);
-  tmp.dataFile = await fsp.readFile(pathToFile, 'utf-8');
+  tmp.loadedHtml = await fsp.readFile(tmp.getFixturePath(tmp.htmlFileName), 'utf-8');
 
-  const pathToAfter = path.join(tmp.pathToFixtures, tmp.fileNameWithChanges);
-  tmp.dataFileWithChanges = await fsp.readFile(pathToAfter, 'utf-8');
-
-  tmp.imgFile = await fsp.readFile(path.join(tmp.pathToFixtures, tmp.imgFileName));
-  tmp.cssFile = await fsp.readFile(path.join(tmp.pathToFixtures, tmp.cssFileName));
-  tmp.jsFile = await fsp.readFile(path.join(tmp.pathToFixtures, tmp.jsFileName));
+  tmp.htmlFixture = await fsp.readFile(tmp.getFixturePath(tmp.htmlFixtureName), 'utf-8');
+  tmp.imgFixture = await fsp.readFile(tmp.getFixturePath('ru-hexlet-io-assets-professions-nodejs.png'));
+  tmp.cssFixture = await fsp.readFile(tmp.getFixturePath('ru-hexlet-io-assets-application.css'));
+  tmp.jsFixture = await fsp.readFile(tmp.getFixturePath('ru-hexlet-io-packs-js-runtime.js'));
 });
 
 beforeEach(async () => {
   nock.cleanAll();
-  tmp.pathToDirectory = await fsp.mkdtemp(path.join(tmpdir(), 'page-loader-'));
-  tmp.pathToFileDirectory = path.join(tmp.pathToDirectory, tmp.fileDirectoryName);
+  tmp.downloadDirectory = await fsp.mkdtemp(path.join(tmpdir(), 'page-loader-'));
+  tmp.fileDirectory = path.join(tmp.downloadDirectory, 'ru-hexlet-io-courses_files');
 });
 
 test('parsing/downloadingFiles', async () => {
-  nock(tmp.base).persist().get(tmp.url.courses).reply(200, tmp.dataFile);
-  nock(tmp.base).get(tmp.url.img).reply(200, tmp.imgFile);
-  nock(tmp.base).get(tmp.url.css).reply(200, tmp.cssFile);
-  nock(tmp.base).get(tmp.url.js).reply(200, tmp.jsFile);
+  nock(tmp.base).persist().get(tmp.url.courses).reply(200, tmp.loadedHtml);
+  nock(tmp.base).get(tmp.url.img).reply(200, tmp.imgFixture);
+  nock(tmp.base).get(tmp.url.css).reply(200, tmp.cssFixture);
+  nock(tmp.base).get(tmp.url.js).reply(200, tmp.jsFixture);
 
-  await pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory);
+  await pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.downloadDirectory);
 
-  const pathToFile = path.join(tmp.pathToDirectory, tmp.fileName);
-  const dataFile = await fsp.readFile(pathToFile, 'utf-8');
-  const dir = await fsp.readdir(tmp.pathToFileDirectory);
+  const htmlFilePath = path.join(tmp.downloadDirectory, tmp.htmlFileName);
+  const imgFilePath = path.join(tmp.fileDirectory, 'ru-hexlet-io-assets-professions-nodejs.png');
+  const cssFilePath = path.join(tmp.fileDirectory, 'ru-hexlet-io-assets-application.css');
+  const jslFilePath = path.join(tmp.fileDirectory, 'ru-hexlet-io-packs-js-runtime.js');
 
-  expect(dataFile).toEqual(tmp.dataFileWithChanges);
-  expect(dir.includes(tmp.imgFileName)).toBeTruthy();
-  expect(dir.includes(tmp.cssFileName)).toBeTruthy();
-  expect(dir.includes(tmp.jsFileName)).toBeTruthy();
-  expect(dir.includes(tmp.wrongFileName)).toBeFalsy();
+  expect(await fsp.readFile(htmlFilePath, 'utf-8')).toEqual(tmp.htmlFixture);
+  expect(await fsp.readFile(imgFilePath)).toEqual(tmp.imgFixture);
+  expect(await fsp.readFile(cssFilePath)).toEqual(tmp.cssFixture);
+  expect(await fsp.readFile(jslFilePath)).toEqual(tmp.jsFixture);
+
+  const downloadedFiles = await fsp.readdir(tmp.fileDirectory);
+  expect(downloadedFiles.includes('cdn2-hexlet-io-assets-menu.css')).toBeFalsy();
 });
 
 test('non existent premissions to write', async () => {
-  nock(tmp.base).get(tmp.url.arbitraryUrl).reply(200, tmp.dataFile);
-  await fsp.chmod(tmp.pathToDirectory, '555');
-  await expect(pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, tmp.pathToDirectory))
+  nock(tmp.base).get(tmp.url.courses).reply(200, tmp.dataFile);
+  await fsp.chmod(tmp.downloadDirectory, '555');
+  await expect(pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.downloadDirectory))
     .rejects.toThrow('permission denied');
 });
 
 test('non existent path', async () => {
-  nock(tmp.base).get(tmp.url.arbitraryUrl).reply(200, tmp.dataFile);
-  await expect(pageLoader(`${tmp.base}${tmp.url.arbitraryUrl}`, 'non-existent-directory'))
+  nock(tmp.base).get(tmp.url.courses).reply(200, tmp.dataFile);
+  await expect(pageLoader(`${tmp.base}${tmp.url.courses}`, 'non-existent-directory'))
     .rejects.toThrow('no such file or directory');
 });
 
 test('no response', async () => {
   nock(tmp.base).get(tmp.url.courses).reply(404, tmp.dataFile);
-  nock(tmp.base).get(tmp.url.img).reply(404, tmp.imgFile);
-  await expect(pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.pathToDirectory))
+  nock(tmp.base).get(tmp.url.img).reply(404, tmp.imgFixture);
+  await expect(pageLoader(`${tmp.base}${tmp.url.courses}`, tmp.downloadDirectory))
     .rejects.toThrow('Request failed with status code 404');
 });
