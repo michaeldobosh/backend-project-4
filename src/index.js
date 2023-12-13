@@ -11,8 +11,8 @@ import parser from './parser.js';
 
 addLogger(axios);
 
-const log = debug(process.env.NAMESPACE);
-log('booting %s', process.env.NAMESPACE);
+const log = debug('page-loader');
+log('booting %s', 'page-loader');
 
 export default (link, output = '') => {
   const requestUrl = new URL(link);
