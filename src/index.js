@@ -21,7 +21,6 @@ export default (link, output = '') => {
   const directoryFileName = fileName.replace('.html', '_files');
   const pathToFile = path.resolve(output, fileName);
   const fileDirectory = path.join(output, directoryFileName);
-  const tasks = [];
   const data = {};
 
   log('downloading html-page');
@@ -39,7 +38,7 @@ export default (link, output = '') => {
     })
     .then(() => {
       log('creating tasks for Listr');
-      tasks.push(...data.urls.map((linkToAsset) => ({
+      const tasks = data.urls.map((linkToAsset) => ({
         title: linkToAsset,
         task: (_stx, task) => axios({ method: 'get', url: linkToAsset, responseType: 'arraybuffer' })
           .then((res) => {
@@ -56,9 +55,7 @@ export default (link, output = '') => {
               throw error;
             }
           }),
-      })));
-    })
-    .then(() => {
+      }));
       const listr = new Listr(tasks, { concurrent: true });
       log('downloading and writing assets');
       return listr.run();
